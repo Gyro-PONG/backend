@@ -5,6 +5,7 @@ const express = require('express');
 const createError = require('http-errors');
 const logger = require('morgan');
 const SocketEvent = require('./constants/socket');
+const Counter = require('./utils/counter');
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -17,6 +18,9 @@ const io = require('socket.io')(server, {
     origin: '*',
   },
 });
+
+const gameList = [];
+const counter = new Counter();
 
 io.on('connection', socket => {
   console.log('socket has been successfully connected => User ID:', socket.id);
@@ -84,6 +88,17 @@ io.on('connection', socket => {
 
   socket.on(SocketEvent.SEND_EXIT, () => {
     io.to(socket.userId).emit(SocketEvent.RECEIVE_EXIT);
+  });
+
+  socket.on(SocketEvent.CREATE_GAME, game => {
+    game.registrationOrder = counter.getCountNumber();
+    gameList.push(game);
+
+    io.emit(SocketEvent.RECEIVE_GAME_LIST, gameList);
+  });
+
+  socket.on(SocketEvent.REQUEST_GAME_LIST, () => {
+    socket.emit(SocketEvent.RECEIVE_GAME_LIST, gameList);
   });
 });
 

@@ -29,6 +29,9 @@ const SocketEvent = {
   RECEIVE_EXIT: 'receiveExit',
   SWITCH_MOTION_SETTING_PAGE: 'switchMotionSettingPage',
   RECEIVE_SWITCH_MOTION_SETTING_PAGE: 'receiveSwitchMotionSettingPage',
+  CREATE_GAME: 'createGame',
+  REQUEST_GAME_LIST: 'requestGameList',
+  RECEIVE_GAME_LIST: 'receiveGameList',
 };
 
 Object.freeze(SocketEvent);

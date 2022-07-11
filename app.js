@@ -19,7 +19,7 @@ const io = require('socket.io')(server, {
   },
 });
 
-const gameList = [];
+const gameRoomList = [];
 const counter = new Counter();
 
 io.on('connection', socket => {
@@ -30,6 +30,60 @@ io.on('connection', socket => {
 
     if (socket.userId) {
       io.to(socket.userId).emit(SocketEvent.REMOVE_CONTROLLER);
+    }
+
+    if (socket.gameId && !socket.isController) {
+      let gameRoomIndex = -1;
+
+      const gameRoom = gameRoomList.find((value, index) => {
+        if (value.gameId === socket.gameId) {
+          gameRoomIndex = index;
+          return true;
+        } else {
+          return false;
+        }
+      });
+
+      if (gameRoom && gameRoomIndex !== -1) {
+        if (gameRoom.isStarted) {
+          gameRoomList.splice(gameRoomIndex, 1);
+
+          if (socket.id === gameRoom.hostId) {
+            io.to(socket.gameId).emit(SocketEvent.RECEIVE_GUEST_WIN, {
+              hostId: gameRoom.hostId,
+              forfeit: true,
+            });
+            io.emit(SocketEvent.RECEIVE_GAME_ROOM_LIST, gameRoomList);
+          } else {
+            io.to(socket.gameId).emit(SocketEvent.RECEIVE_HOST_WIN, {
+              hostId: gameRoom.hostId,
+              forfeit: true,
+            });
+            io.emit(SocketEvent.RECEIVE_GAME_ROOM_LIST, gameRoomList);
+          }
+        } else {
+          if (socket.id === gameRoom.hostId) {
+            gameRoomList.splice(gameRoomIndex, 1);
+
+            io.to(socket.gameId).emit(SocketEvent.RECEIVE_GO_TO_LOBBY);
+            io.emit(SocketEvent.RECEIVE_GAME_ROOM_LIST, gameRoomList);
+          } else {
+            const exitedUserIndex = gameRoom.userList.findIndex(
+              id => id === socket.id,
+            );
+
+            if (exitedUserIndex !== -1) {
+              gameRoom.userList.splice(exitedUserIndex, 1);
+
+              io.to(socket.gameId).emit(
+                SocketEvent.RECEIVE_ROOM_DATA,
+                gameRoom,
+              );
+              io.emit(SocketEvent.RECEIVE_GAME_ROOM_LIST, gameRoomList);
+            }
+          }
+        }
+      }
     }
   });
 
@@ -71,16 +125,22 @@ io.on('connection', socket => {
 
   socket.on(SocketEvent.SEND_SENSOR_DATA, data => {
     if (data.type === 'turnLeft') {
+      socket.leftAngle = data.value;
+
       io.to(socket.userId).emit(SocketEvent.RECEIVE_LEFT_DATA, data.value);
       socket.emit(SocketEvent.LOAD_CONTROLLER_RIGHT_SETTING_PAGE);
     }
 
     if (data.type === 'turnRight') {
+      socket.rightAngle = data.value;
+
       io.to(socket.userId).emit(SocketEvent.RECEIVE_RIGHT_DATA, data.value);
       socket.emit(SocketEvent.LOAD_CONTROLLER_FORWARD_SETTING_PAGE);
     }
 
     if (data.type === 'headForward') {
+      socket.forwardAngle = data.value;
+
       io.to(socket.userId).emit(SocketEvent.RECEIVE_FORWARD_DATA, data.value);
       socket.emit(SocketEvent.LOAD_CONTROLLER_SETTING_FINISH_PAGE);
     }
@@ -92,13 +152,178 @@ io.on('connection', socket => {
 
   socket.on(SocketEvent.CREATE_GAME, game => {
     game.registrationOrder = counter.getCountNumber();
-    gameList.push(game);
+    gameRoomList.push(game);
 
-    io.emit(SocketEvent.RECEIVE_GAME_LIST, gameList);
+    io.emit(SocketEvent.RECEIVE_GAME_ROOM_LIST, gameRoomList);
   });
 
-  socket.on(SocketEvent.REQUEST_GAME_LIST, () => {
-    socket.emit(SocketEvent.RECEIVE_GAME_LIST, gameList);
+  socket.on(SocketEvent.REQUEST_GAME_ROOM_LIST, () => {
+    socket.emit(SocketEvent.RECEIVE_GAME_ROOM_LIST, gameRoomList);
+  });
+
+  socket.on(SocketEvent.SEND_JOIN_GAME, data => {
+    const gameRoom = gameRoomList.find(value => value.gameId === data.gameId);
+
+    if (!gameRoom) {
+      socket.emit(SocketEvent.RECEIVE_JOIN_ERROR);
+    } else if (gameRoom?.userList.length >= 2) {
+      socket.emit(SocketEvent.RECEIVE_JOIN_ERROR);
+    } else {
+      if (gameRoom.width > data.width) {
+        gameRoom.width = data.width;
+      }
+
+      if (gameRoom.height > data.height) {
+        gameRoom.height = data.height;
+      }
+
+      socket.gameId = data.gameId;
+      gameRoom?.userList.push(socket.id);
+
+      io.to(data.controllerId).emit(SocketEvent.RECEIVE_GAME_ID, data.gameId);
+      socket.join(data.gameId);
+      io.to(data.gameId).emit(SocketEvent.RECEIVE_ROOM_DATA, gameRoom);
+    }
+  });
+
+  socket.on(SocketEvent.SEND_CONTROLLER_JOIN_GAME, gameId => {
+    const gameRoom = gameRoomList.find(value => value.gameId === gameId);
+    gameRoom?.controllerList.push(socket.id);
+
+    socket.gameId = gameId;
+    socket.isController = true;
+
+    socket.join(gameId);
+    io.to(gameId).emit(SocketEvent.RECEIVE_ROOM_DATA, gameRoom);
+  });
+
+  socket.on(SocketEvent.SEND_GAME_START, gameId => {
+    gameRoomList.find(value => value.gameId === gameId).isStarted = true;
+
+    io.to(gameId).emit(SocketEvent.RECEIVE_GAME_START);
+    io.emit(SocketEvent.RECEIVE_GAME_ROOM_LIST, gameRoomList);
+  });
+
+  socket.on(SocketEvent.SEND_HOST_WIN, gameId => {
+    const gameRoom = gameRoomList.find(value => value.gameId === gameId);
+    gameRoom.isStarted = false;
+
+    io.to(gameId).emit(SocketEvent.RECEIVE_HOST_WIN, {
+      hostId: gameRoom.hostId,
+      forfeit: false,
+    });
+  });
+
+  socket.on(SocketEvent.SEND_GUEST_WIN, gameId => {
+    const gameRoom = gameRoomList.find(value => value.gameId === gameId);
+    gameRoom.isStarted = false;
+
+    io.to(gameId).emit(SocketEvent.RECEIVE_GUEST_WIN, {
+      hostId: gameRoom.hostId,
+      forfeit: false,
+    });
+  });
+
+  socket.on(SocketEvent.SEND_BETA, beta => {
+    io.to(socket.gameId).emit(SocketEvent.RECEIVE_BETA, {
+      userId: socket.userId,
+      beta,
+      leftAngle: socket.leftAngle,
+      rightAngle: socket.rightAngle,
+    });
+  });
+
+  socket.on(SocketEvent.SEND_ROOM_IS_FULL, gameId => {
+    gameRoomList.find(value => value.gameId === gameId).isFull = true;
+
+    io.emit(SocketEvent.RECEIVE_GAME_ROOM_LIST, gameRoomList);
+  });
+
+  socket.on(SocketEvent.SEND_ROOM_IS_NOT_FULL, gameId => {
+    gameRoomList.find(value => value.gameId === gameId).isFull = false;
+
+    io.emit(SocketEvent.RECEIVE_GAME_ROOM_LIST, gameRoomList);
+  });
+
+  socket.on(SocketEvent.USER_EXIT_GAME, gameId => {
+    let gameRoomIndex = -1;
+
+    const gameRoom = gameRoomList.find((value, index) => {
+      if (value.gameId === gameId) {
+        gameRoomIndex = index;
+        return true;
+      } else {
+        return false;
+      }
+    });
+
+    if (gameRoom && gameRoomIndex !== -1 && socket.gameId === gameId) {
+      if (gameRoom.isStarted) {
+        gameRoomList.splice(gameRoomIndex, 1);
+
+        if (socket.id === gameRoom.hostId) {
+          io.to(gameId).emit(SocketEvent.RECEIVE_GUEST_WIN, {
+            hostId: gameRoom.hostId,
+            forfeit: true,
+          });
+          io.emit(SocketEvent.RECEIVE_GAME_ROOM_LIST, gameRoomList);
+        } else {
+          io.to(gameId).emit(SocketEvent.RECEIVE_HOST_WIN, {
+            hostId: gameRoom.hostId,
+            forfeit: true,
+          });
+          io.emit(SocketEvent.RECEIVE_GAME_ROOM_LIST, gameRoomList);
+        }
+      } else {
+        if (socket.id === gameRoom.hostId) {
+          gameRoomList.splice(gameRoomIndex, 1);
+
+          io.to(gameId).emit(SocketEvent.RECEIVE_GO_TO_LOBBY);
+          io.emit(SocketEvent.RECEIVE_GAME_ROOM_LIST, gameRoomList);
+        } else {
+          const exitedUserIndex = gameRoom.userList.findIndex(
+            id => id === socket.id,
+          );
+
+          if (exitedUserIndex !== -1) {
+            gameRoom.userList.splice(exitedUserIndex, 1);
+
+            io.to(gameId).emit(SocketEvent.RECEIVE_ROOM_DATA, gameRoom);
+            io.emit(SocketEvent.RECEIVE_GAME_ROOM_LIST, gameRoomList);
+          }
+        }
+      }
+    }
+
+    socket.gameId = '';
+  });
+
+  socket.on(SocketEvent.SEND_RESIZE_EVENT, gameId => {
+    let gameRoomIndex = -1;
+
+    const gameRoom = gameRoomList.find((value, index) => {
+      if (value.gameId === gameId) {
+        gameRoomIndex = index;
+        return true;
+      } else {
+        return false;
+      }
+    });
+
+    if (gameRoom.hostId === socket.id) {
+      io.to(gameId).emit(SocketEvent.RECEIVE_GUEST_WIN, {
+        hostId: gameRoom.hostId,
+        forfeit: true,
+      });
+    } else {
+      io.to(gameId).emit(SocketEvent.RECEIVE_HOST_WIN, {
+        hostId: gameRoom.hostId,
+        forfeit: true,
+      });
+    }
+
+    gameRoomList.splice(gameRoomIndex, 1);
+    io.emit(SocketEvent.RECEIVE_GAME_ROOM_LIST, gameRoomList);
   });
 });
 

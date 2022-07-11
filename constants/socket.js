@@ -62,6 +62,10 @@ const SocketEvent = {
   SEND_HOST_PADDLE_VIBRATION: 'sendHostPaddleVibration',
   SEND_GUEST_PADDLE_VIBRATION: 'sendGuestPaddleVibration',
   CONTROLLER_EXIT_GAME: 'controllerExitGame',
+  LOAD_CONTROLLER_GAME_PAGE: 'loadControllerGamePage',
+  REQUEST_EXIT_GAME: 'requestExitGame',
+  RECEIVE_EXIT_GAME: 'receiveExitGame',
+  ENTER_CONTROLLER_GAME_PAGE: 'enterControllerGamePage',
 };
 
 Object.freeze(SocketEvent);

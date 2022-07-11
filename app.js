@@ -128,6 +128,10 @@ io.on('connection', socket => {
     io.to(controllerId).emit(SocketEvent.LOAD_CONTROLLER_MOTION_SETTING_PAGE);
   });
 
+  socket.on(SocketEvent.ENTER_CONTROLLER_GAME_PAGE, () => {
+    io.to(socket.controllerId).emit(SocketEvent.LOAD_CONTROLLER_GAME_PAGE);
+  });
+
   socket.on(SocketEvent.START_MOTION_SETTING, () => {
     io.to(socket.userId).emit(SocketEvent.RECEIVE_MOTION_SETTING_BEGIN);
     socket.emit(SocketEvent.LOAD_CONTROLLER_LEFT_SETTING_PAGE);
@@ -254,6 +258,10 @@ io.on('connection', socket => {
     gameRoomList.find(value => value.gameId === gameId).isFull = false;
 
     io.emit(SocketEvent.RECEIVE_GAME_ROOM_LIST, gameRoomList);
+  });
+
+  socket.on(SocketEvent.REQUEST_EXIT_GAME, () => {
+    io.to(socket.userId).emit(SocketEvent.RECEIVE_EXIT_GAME);
   });
 
   socket.on(SocketEvent.USER_EXIT_GAME, gameId => {

@@ -44,6 +44,8 @@ io.on('connection', socket => {
         }
       });
 
+      io.to(socket.controllerId).emit(SocketEvent.CONTROLLER_EXIT_GAME);
+
       if (gameRoom && gameRoomIndex !== -1) {
         if (gameRoom.isStarted) {
           gameRoomList.splice(gameRoomIndex, 1);
@@ -71,6 +73,14 @@ io.on('connection', socket => {
             const exitedUserIndex = gameRoom.userList.findIndex(
               id => id === socket.id,
             );
+
+            const exitedControllerIndex = gameRoom.controllerList.findIndex(
+              id => id === socket.controllerId,
+            );
+
+            if (exitedControllerIndex !== -1) {
+              gameRoom.controllerList.splice(exitedControllerIndex, 1);
+            }
 
             if (exitedUserIndex !== -1) {
               gameRoom.userList.splice(exitedUserIndex, 1);
@@ -178,6 +188,7 @@ io.on('connection', socket => {
       }
 
       socket.gameId = data.gameId;
+      socket.controllerId = data.controllerId;
       gameRoom?.userList.push(socket.id);
 
       io.to(data.controllerId).emit(SocketEvent.RECEIVE_GAME_ID, data.gameId);
@@ -257,6 +268,8 @@ io.on('connection', socket => {
       }
     });
 
+    io.to(socket.controllerId).emit(SocketEvent.CONTROLLER_EXIT_GAME);
+
     if (gameRoom && gameRoomIndex !== -1 && socket.gameId === gameId) {
       if (gameRoom.isStarted) {
         gameRoomList.splice(gameRoomIndex, 1);
@@ -284,6 +297,14 @@ io.on('connection', socket => {
           const exitedUserIndex = gameRoom.userList.findIndex(
             id => id === socket.id,
           );
+
+          const exitedControllerIndex = gameRoom.controllerList.findIndex(
+            id => id === socket.controllerId,
+          );
+
+          if (exitedControllerIndex !== -1) {
+            gameRoom.controllerList.splice(exitedControllerIndex, 1);
+          }
 
           if (exitedUserIndex !== -1) {
             gameRoom.userList.splice(exitedUserIndex, 1);
@@ -324,6 +345,54 @@ io.on('connection', socket => {
 
     gameRoomList.splice(gameRoomIndex, 1);
     io.emit(SocketEvent.RECEIVE_GAME_ROOM_LIST, gameRoomList);
+  });
+
+  socket.on(SocketEvent.SEND_HOST_PADDLE_VIBRATION, gameId => {
+    const gameRoom = gameRoomList.find(value => value.gameId === gameId);
+
+    if (socket.id === gameRoom.hostId) {
+      io.to(socket.controllerId).emit(SocketEvent.RECEIVE_PADDLE_VIBRATION);
+    }
+  });
+
+  socket.on(SocketEvent.SEND_GUEST_PADDLE_VIBRATION, gameId => {
+    const gameRoom = gameRoomList.find(value => value.gameId === gameId);
+
+    if (socket.id !== gameRoom.hostId) {
+      io.to(socket.controllerId).emit(SocketEvent.RECEIVE_PADDLE_VIBRATION);
+    }
+  });
+
+  socket.on(SocketEvent.SEND_GUEST_WIN_VIBRATION, gameId => {
+    const gameRoom = gameRoomList.find(value => value.gameId === gameId);
+
+    if (socket.id !== gameRoom.hostId) {
+      io.to(socket.controllerId).emit(SocketEvent.RECEIVE_WIN_VIBRATION);
+    }
+  });
+
+  socket.on(SocketEvent.SEND_GUEST_LOSE_VIBRATION, gameId => {
+    const gameRoom = gameRoomList.find(value => value.gameId === gameId);
+
+    if (socket.id !== gameRoom.hostId) {
+      io.to(socket.controllerId).emit(SocketEvent.RECEIVE_LOSE_VIBRATION);
+    }
+  });
+
+  socket.on(SocketEvent.SEND_HOST_WIN_VIBRATION, gameId => {
+    const gameRoom = gameRoomList.find(value => value.gameId === gameId);
+
+    if (socket.id === gameRoom.hostId) {
+      io.to(socket.controllerId).emit(SocketEvent.RECEIVE_WIN_VIBRATION);
+    }
+  });
+
+  socket.on(SocketEvent.SEND_HOST_LOSE_VIBRATION, gameId => {
+    const gameRoom = gameRoomList.find(value => value.gameId === gameId);
+
+    if (socket.id === gameRoom.hostId) {
+      io.to(socket.controllerId).emit(SocketEvent.RECEIVE_LOSE_VIBRATION);
+    }
   });
 });
 

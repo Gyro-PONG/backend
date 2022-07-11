@@ -52,6 +52,16 @@ const SocketEvent = {
   RECEIVE_GUEST_WIN: 'receiveGuestWin',
   USER_EXIT_GAME: 'userExitGame',
   SEND_RESIZE_EVENT: 'sendResizeEvent',
+  RECEIVE_PADDLE_VIBRATION: 'receivePaddleVibration',
+  RECEIVE_WIN_VIBRATION: 'receiveWinVibration',
+  RECEIVE_LOSE_VIBRATION: 'receiveLoseVibration',
+  SEND_GUEST_WIN_VIBRATION: 'sendGuestWinVibration',
+  SEND_GUEST_LOSE_VIBRATION: 'sendGuestLoseVibration',
+  SEND_HOST_WIN_VIBRATION: 'sendHostWinVibration',
+  SEND_HOST_LOSE_VIBRATION: 'sendHostLoseVibration',
+  SEND_HOST_PADDLE_VIBRATION: 'sendHostPaddleVibration',
+  SEND_GUEST_PADDLE_VIBRATION: 'sendGuestPaddleVibration',
+  CONTROLLER_EXIT_GAME: 'controllerExitGame',
 };
 
 Object.freeze(SocketEvent);

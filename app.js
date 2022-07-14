@@ -44,8 +44,6 @@ io.on('connection', socket => {
         }
       });
 
-      io.to(socket.controllerId).emit(SocketEvent.CONTROLLER_EXIT_GAME);
-
       if (gameRoom && gameRoomIndex !== -1) {
         if (gameRoom.isStarted) {
           gameRoomList.splice(gameRoomIndex, 1);
@@ -124,7 +122,7 @@ io.on('connection', socket => {
     io.to(socket.userId).emit(SocketEvent.CONTROLLER_CONNECTION_FAILURE);
   });
 
-  socket.on(SocketEvent.ENTER_MOTION_SETTING_PAGE, controllerId => {
+  socket.on(SocketEvent.ENTER_CONTROLLER_MOTION_SETTING_PAGE, controllerId => {
     io.to(controllerId).emit(SocketEvent.LOAD_CONTROLLER_MOTION_SETTING_PAGE);
   });
 
@@ -149,13 +147,6 @@ io.on('connection', socket => {
       socket.rightAngle = data.value;
 
       io.to(socket.userId).emit(SocketEvent.RECEIVE_RIGHT_DATA, data.value);
-      socket.emit(SocketEvent.LOAD_CONTROLLER_FORWARD_SETTING_PAGE);
-    }
-
-    if (data.type === 'headForward') {
-      socket.forwardAngle = data.value;
-
-      io.to(socket.userId).emit(SocketEvent.RECEIVE_FORWARD_DATA, data.value);
       socket.emit(SocketEvent.LOAD_CONTROLLER_SETTING_FINISH_PAGE);
     }
   });
@@ -275,8 +266,6 @@ io.on('connection', socket => {
         return false;
       }
     });
-
-    io.to(socket.controllerId).emit(SocketEvent.CONTROLLER_EXIT_GAME);
 
     if (gameRoom && gameRoomIndex !== -1 && socket.gameId === gameId) {
       if (gameRoom.isStarted) {
@@ -401,6 +390,33 @@ io.on('connection', socket => {
     if (socket.id === gameRoom.hostId) {
       io.to(socket.controllerId).emit(SocketEvent.RECEIVE_LOSE_VIBRATION);
     }
+  });
+
+  socket.on(SocketEvent.SEND_MOTION_CHANGING_MODE_STATE, data => {
+    io.to(data.controllerId).emit(
+      SocketEvent.RECEIVE_MOTION_CHANGING_MODE_STATE,
+      data.state,
+    );
+  });
+
+  socket.on(SocketEvent.SEND_MOVE_UP, () => {
+    io.to(socket.userId).emit(SocketEvent.RECEIVE_MOVE_UP);
+  });
+
+  socket.on(SocketEvent.SEND_MOVE_DOWN, () => {
+    io.to(socket.userId).emit(SocketEvent.RECEIVE_MOVE_DOWN);
+  });
+
+  socket.on(SocketEvent.SEND_MOVE_LEFT, () => {
+    io.to(socket.userId).emit(SocketEvent.RECEIVE_MOVE_LEFT);
+  });
+
+  socket.on(SocketEvent.SEND_MOVE_RIGHT, () => {
+    io.to(socket.userId).emit(SocketEvent.RECEIVE_MOVE_RIGHT);
+  });
+
+  socket.on(SocketEvent.SEND_STOP_DETECT_MOTION, () => {
+    io.to(socket.userId).emit(SocketEvent.RECEIVE_STOP_DETECT_MOTION);
   });
 });
 

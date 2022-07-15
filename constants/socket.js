@@ -75,6 +75,8 @@ const SocketEvent = {
   RECEIVE_MOTION_CHANGING_MODE_STATE: 'receiveMotionChangingModeState',
   SEND_STOP_DETECT_MOTION: 'sendStopDetectMotion',
   RECEIVE_STOP_DETECT_MOTION: 'receiveStopDetectMotion',
+  SEND_TEST: 'sendTest',
+  RECEIVE_TEST: 'receiveTest',
 };
 
 Object.freeze(SocketEvent);

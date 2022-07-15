@@ -1,9 +1,11 @@
-function Counter() {
-  let count = 1;
+class Counter {
+  constructor() {
+    this.count = 1;
+  }
 
-  Counter.prototype.getCountNumber = () => {
-    return count++;
-  };
+  get getCountNumber() {
+    return this.count++;
+  }
 }
 
 module.exports = Counter;

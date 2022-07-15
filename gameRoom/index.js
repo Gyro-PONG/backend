@@ -69,8 +69,13 @@ const getGameRoomList = () => {
   return gameRoomList;
 };
 
+const resetRoomList = () => {
+  gameRoomList.splice(0, gameRoomList.length);
+};
+
 exports.findGameRoom = findGameRoom;
 exports.addGameRoom = addGameRoom;
 exports.deleteGameRoom = deleteGameRoom;
 exports.getGameRoomList = getGameRoomList;
 exports.setGameRoom = setGameRoom;
+exports.resetRoomList = resetRoomList;

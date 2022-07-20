@@ -418,13 +418,21 @@ const socketModule = server => {
     socket.on(SocketEvent.SEND_SYNC_GAME, data => {
       const { gameRoom } = findGameRoom(data.gameId);
 
-      if (gameRoom.isHostInFocus) {
-        if (data.isUserHost) {
-          io.to(data.gameId).emit(SocketEvent.RECEIVE_SYNC_GAME, data.gameData);
-        }
-      } else {
-        if (!data.isUserHost) {
-          io.to(data.gameId).emit(SocketEvent.RECEIVE_SYNC_GAME, data.gameData);
+      if (gameRoom) {
+        if (gameRoom.isHostInFocus) {
+          if (data.isUserHost) {
+            io.to(data.gameId).emit(
+              SocketEvent.RECEIVE_SYNC_GAME,
+              data.gameData,
+            );
+          }
+        } else {
+          if (!data.isUserHost) {
+            io.to(data.gameId).emit(
+              SocketEvent.RECEIVE_SYNC_GAME,
+              data.gameData,
+            );
+          }
         }
       }
     });

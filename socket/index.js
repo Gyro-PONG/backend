@@ -414,6 +414,36 @@ const socketModule = server => {
     socket.on(SocketEvent.SEND_STOP_DETECT_MOTION, () => {
       io.to(socket.userId).emit(SocketEvent.RECEIVE_STOP_DETECT_MOTION);
     });
+
+    socket.on(SocketEvent.SEND_SYNC_GAME, data => {
+      const { gameRoom } = findGameRoom(data.gameId);
+
+      if (gameRoom.isHostInFocus) {
+        if (data.isUserHost) {
+          io.to(data.gameId).emit(SocketEvent.RECEIVE_SYNC_GAME, data.gameData);
+        }
+      } else {
+        if (!data.isUserHost) {
+          io.to(data.gameId).emit(SocketEvent.RECEIVE_SYNC_GAME, data.gameData);
+        }
+      }
+    });
+
+    socket.on(SocketEvent.SEND_HOST_IS_IN_FOCUS, gameId => {
+      const { gameRoomIndex } = findGameRoom(gameId);
+
+      if (gameRoomIndex !== -1) {
+        setGameRoom(gameRoomIndex, 'isHostInFocus', true);
+      }
+    });
+
+    socket.on(SocketEvent.SEND_HOST_IS_NOT_IN_FOCUS, gameId => {
+      const { gameRoomIndex } = findGameRoom(gameId);
+
+      if (gameRoomIndex !== -1) {
+        setGameRoom(gameRoomIndex, 'isHostInFocus', false);
+      }
+    });
   });
 };
 

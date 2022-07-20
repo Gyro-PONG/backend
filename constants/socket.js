@@ -76,6 +76,10 @@ const SocketEvent = {
   SEND_TEST: 'sendTest',
   RECEIVE_TEST: 'receiveTest',
   RECEIVE_EXPIRE_CONTROLLER: 'receiveExpireController',
+  SEND_SYNC_GAME: 'sendSyncGame',
+  RECEIVE_SYNC_GAME: 'receiveSyncGame',
+  SEND_HOST_IS_IN_FOCUS: 'sendHostIsInFocus',
+  SEND_HOST_IS_NOT_IN_FOCUS: 'sendHostIsNotInFocus',
 };
 
 Object.freeze(SocketEvent);

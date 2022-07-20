@@ -91,8 +91,14 @@ const socketModule = server => {
       socket.emit(SocketEvent.LOAD_CONTROLLER_SENSOR_ACTIVATE_PAGE);
     });
 
-    socket.on(SocketEvent.DISCONNECT_CONTROLLER, () => {
-      io.to(socket.userId).emit(SocketEvent.REMOVE_CONTROLLER);
+    socket.on(SocketEvent.DISCONNECT_CONTROLLER, data => {
+      if (data.sender === 'controller') {
+        io.to(socket.userId).emit(SocketEvent.REMOVE_CONTROLLER);
+      } else if (data.sender === 'settingPage') {
+        io.to(data.controllerId).emit(SocketEvent.RECEIVE_EXPIRE_CONTROLLER);
+        socket.emit(SocketEvent.REMOVE_CONTROLLER);
+        socket.controllerId = '';
+      }
     });
 
     socket.on(SocketEvent.CONTROLLER_COMPATIBILITY_SUCCESS, () => {

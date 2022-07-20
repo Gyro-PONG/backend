@@ -13,7 +13,6 @@ const SocketEvent = {
   LOAD_CONTROLLER_MOTION_SETTING_PAGE: 'loadControllerMotionSettingPage',
   LOAD_CONTROLLER_LEFT_SETTING_PAGE: 'loadControllerLeftSettingPage',
   LOAD_CONTROLLER_RIGHT_SETTING_PAGE: 'loadControllerRightSettingPage',
-  LOAD_CONTROLLER_FORWARD_SETTING_PAGE: 'loadControllerForwardSettingPage',
   LOAD_CONTROLLER_DEFAULT_PAGE: 'loadControllerDefaultPage',
   LOAD_CONTROLLER_SENSOR_ACTIVATE_PAGE: 'loadControllerSensorActivatePage',
   LOAD_CONTROLLER_SETTING_FINISH_PAGE: 'loadControllerSettingFinishPage',
@@ -24,7 +23,6 @@ const SocketEvent = {
   RECEIVE_MOTION_SETTING_BEGIN: 'receiveMotionSettingBegin',
   RECEIVE_LEFT_DATA: 'receiveLeftData',
   RECEIVE_RIGHT_DATA: 'receiveRightData',
-  RECEIVE_FORWARD_DATA: 'receiveForwardData',
   SEND_EXIT: 'sendExit',
   RECEIVE_EXIT: 'receiveExit',
   SWITCH_MOTION_SETTING_PAGE: 'switchMotionSettingPage',
@@ -77,6 +75,11 @@ const SocketEvent = {
   RECEIVE_STOP_DETECT_MOTION: 'receiveStopDetectMotion',
   SEND_TEST: 'sendTest',
   RECEIVE_TEST: 'receiveTest',
+  RECEIVE_EXPIRE_CONTROLLER: 'receiveExpireController',
+  SEND_SYNC_GAME: 'sendSyncGame',
+  RECEIVE_SYNC_GAME: 'receiveSyncGame',
+  SEND_HOST_IS_IN_FOCUS: 'sendHostIsInFocus',
+  SEND_HOST_IS_NOT_IN_FOCUS: 'sendHostIsNotInFocus',
 };
 
 Object.freeze(SocketEvent);

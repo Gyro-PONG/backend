@@ -60,6 +60,9 @@ const setGameRoom = (index, option, value) => {
     case 'isStarted':
       gameRoomList[index].isStarted = value;
       break;
+    case 'isHostInFocus':
+      gameRoomList[index].isHostInFocus = value;
+      break;
     default:
       break;
   }

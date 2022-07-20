@@ -91,8 +91,14 @@ const socketModule = server => {
       socket.emit(SocketEvent.LOAD_CONTROLLER_SENSOR_ACTIVATE_PAGE);
     });
 
-    socket.on(SocketEvent.DISCONNECT_CONTROLLER, () => {
-      io.to(socket.userId).emit(SocketEvent.REMOVE_CONTROLLER);
+    socket.on(SocketEvent.DISCONNECT_CONTROLLER, data => {
+      if (data.sender === 'controller') {
+        io.to(socket.userId).emit(SocketEvent.REMOVE_CONTROLLER);
+      } else if (data.sender === 'settingPage') {
+        io.to(data.controllerId).emit(SocketEvent.RECEIVE_EXPIRE_CONTROLLER);
+        socket.emit(SocketEvent.REMOVE_CONTROLLER);
+        socket.controllerId = '';
+      }
     });
 
     socket.on(SocketEvent.CONTROLLER_COMPATIBILITY_SUCCESS, () => {
@@ -407,6 +413,44 @@ const socketModule = server => {
 
     socket.on(SocketEvent.SEND_STOP_DETECT_MOTION, () => {
       io.to(socket.userId).emit(SocketEvent.RECEIVE_STOP_DETECT_MOTION);
+    });
+
+    socket.on(SocketEvent.SEND_SYNC_GAME, data => {
+      const { gameRoom } = findGameRoom(data.gameId);
+
+      if (gameRoom) {
+        if (gameRoom.isHostInFocus) {
+          if (data.isUserHost) {
+            io.to(data.gameId).emit(
+              SocketEvent.RECEIVE_SYNC_GAME,
+              data.gameData,
+            );
+          }
+        } else {
+          if (!data.isUserHost) {
+            io.to(data.gameId).emit(
+              SocketEvent.RECEIVE_SYNC_GAME,
+              data.gameData,
+            );
+          }
+        }
+      }
+    });
+
+    socket.on(SocketEvent.SEND_HOST_IS_IN_FOCUS, gameId => {
+      const { gameRoomIndex } = findGameRoom(gameId);
+
+      if (gameRoomIndex !== -1) {
+        setGameRoom(gameRoomIndex, 'isHostInFocus', true);
+      }
+    });
+
+    socket.on(SocketEvent.SEND_HOST_IS_NOT_IN_FOCUS, gameId => {
+      const { gameRoomIndex } = findGameRoom(gameId);
+
+      if (gameRoomIndex !== -1) {
+        setGameRoom(gameRoomIndex, 'isHostInFocus', false);
+      }
     });
   });
 };

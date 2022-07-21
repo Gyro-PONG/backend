@@ -80,6 +80,8 @@ const SocketEvent = {
   RECEIVE_SYNC_GAME: 'receiveSyncGame',
   SEND_HOST_IS_IN_FOCUS: 'sendHostIsInFocus',
   SEND_HOST_IS_NOT_IN_FOCUS: 'sendHostIsNotInFocus',
+  SEND_TOGGLE_MOTION_BUTTON: 'sendToggleMotionButton',
+  RECEIVE_TOGGLE_MOTION_BUTTON: 'receiveToggleMotionButton',
 };
 
 Object.freeze(SocketEvent);

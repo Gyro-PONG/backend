@@ -421,17 +421,17 @@ const socketModule = server => {
       if (gameRoom) {
         if (gameRoom.isHostInFocus) {
           if (data.isUserHost) {
-            io.to(data.gameId).emit(
-              SocketEvent.RECEIVE_SYNC_GAME,
-              data.gameData,
-            );
+            io.to(data.gameId).emit(SocketEvent.RECEIVE_SYNC_GAME, {
+              gameData: data.gameData,
+              isHostInFocus: gameRoom.isHostInFocus,
+            });
           }
         } else {
           if (!data.isUserHost) {
-            io.to(data.gameId).emit(
-              SocketEvent.RECEIVE_SYNC_GAME,
-              data.gameData,
-            );
+            io.to(data.gameId).emit(SocketEvent.RECEIVE_SYNC_GAME, {
+              gameData: data.gameData,
+              isHostInFocus: gameRoom.isHostInFocus,
+            });
           }
         }
       }
@@ -451,6 +451,10 @@ const socketModule = server => {
       if (gameRoomIndex !== -1) {
         setGameRoom(gameRoomIndex, 'isHostInFocus', false);
       }
+    });
+
+    socket.on(SocketEvent.SEND_TOGGLE_MOTION_BUTTON, controllerId => {
+      io.to(controllerId).emit(SocketEvent.RECEIVE_TOGGLE_MOTION_BUTTON);
     });
   });
 };

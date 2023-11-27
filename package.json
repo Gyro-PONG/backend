@@ -1,11 +1,12 @@
 {
-  "name": "backend",
+  "name": "gyro_pong_back",
   "version": "1.2.0",
   "private": true,
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "test": "mocha spec --sort --exit"
+    "test": "mocha spec --sort --exit",
+    "prepare": "husky install"
   },
   "dependencies": {
     "dotenv": "^16.0.1",
@@ -15,11 +16,14 @@
     "socket.io": "^4.5.1"
   },
   "devDependencies": {
+    "@commitlint/cli": "^18.4.3",
+    "@commitlint/config-conventional": "^18.4.3",
     "chai": "^4.3.6",
     "eslint": "^8.18.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prefer-arrow": "^1.2.3",
     "eslint-plugin-prettier": "^4.2.1",
+    "husky": "^8.0.3",
     "mocha": "^10.0.0",
     "nodemon": "^2.0.18",
     "socket.io-client": "^4.5.1",

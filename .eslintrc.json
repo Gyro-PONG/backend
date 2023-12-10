@@ -27,6 +27,10 @@
   ],
   "rules": {
     "no-useless-catch": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "next" }
+    ],
     "import/order": [
       "error",
       {

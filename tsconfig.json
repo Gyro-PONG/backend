@@ -3,6 +3,7 @@
     "target": "ES2020",
     "module": "ESNext",
     "rootDir": ".",
+    "moduleResolution": "Node",
     "moduleDetection": "force",
     "outDir": "./dist",
     "allowJs": true,
@@ -11,5 +12,11 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "exclude": ["node_modules/*", "dist/*", "coverage/*", "jest.config.ts"]
+  "exclude": [
+    "node_modules/**/*",
+    "dist/**/*",
+    "coverage/**/*",
+    "jest.config.ts",
+    "test/**/*"
+  ]
 }

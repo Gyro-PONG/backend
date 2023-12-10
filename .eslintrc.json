@@ -20,10 +20,10 @@
   },
   "plugins": ["import", "@typescript-eslint", "jest"],
   "ignorePatterns": [
-    "node_modules/*",
+    "node_modules/**/*",
     "jest.config.ts",
-    "dist/*",
-    "coverage/*"
+    "dist/**/*",
+    "coverage/**/*"
   ],
   "rules": {
     "no-useless-catch": "off",

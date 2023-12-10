@@ -24,6 +24,10 @@ if (process.env.NODE_ENV === 'production') {
   app.use(morgan('dev'));
 }
 
+app.get('/', (req: Request, res: Response) => {
+  res.json({ message: 'server_status_ok' });
+});
+
 app.use((req: Request, res: Response, next: NextFunction) => {
   next(createError(404));
 });

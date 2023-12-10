@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p .",
-    "start": "NODE_ENV=production node ./dist/server.js",
+    "start": "NODE_ENV=production pm2 start node ./dist/server.js",
+    "stop": "pm2 stop node ./dist/server.js",
     "dev": "NODE_ENV=development tsc-watch --onSuccess \"node ./dist/server.js\"",
     "test": "jest -i",
     "test:w": "jest -i --watch",

@@ -48,12 +48,14 @@ export const socketServer = (server: HttpServer) => {
               EVENT.EXIT_GAME_BY_HOST,
               gameData.game.getId(),
             );
+            gameData.game.getEngine().stopLoop();
             gameList.removeById(gameData.game.getId());
             io.emit(EVENT.LOAD_GAME_ROOM_LIST, gameList.getList());
           } else {
             gameData.game.setGuestId('');
 
             if (gameData.game.getIsStarted()) {
+              gameData.game.getEngine().stopLoop();
               gameList.removeById(gameData.game.getId());
             }
 

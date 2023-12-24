@@ -2,7 +2,7 @@ import { Server } from 'socket.io';
 
 import { CustomSocket } from './index.js';
 import { EVENT } from '../constants/socket.js';
-import { userList } from '../gameData/index.js';
+import { gameList, userList } from '../gameData/index.js';
 import { getRevisedBeta } from '../utils/beta.js';
 
 export const sensorEvent = (io: Server, socket: CustomSocket) => {
@@ -25,10 +25,14 @@ export const sensorEvent = (io: Server, socket: CustomSocket) => {
 
     if (gameRoom) {
       // 게임 내에서 beta 전송
-      io.to(gameRoom).emit(EVENT.SEND_GAME_BETA, {
-        beta: getRevisedBeta(beta, socket),
-        controllerId: socket.id,
-      });
+      const user = userList.findByControllerId(socket.id)!;
+      const game = gameList.findByUserId(user.getUserId())!;
+
+      if (game.isHost) {
+        game.game.getEngine().paddleMove('host', getRevisedBeta(beta, socket));
+      } else {
+        game.game.getEngine().paddleMove('guest', getRevisedBeta(beta, socket));
+      }
     } else if (userControllerRoom) {
       // 설정 페이지 내에서 beta 전송
       io.to(userControllerRoom).emit(EVENT.SEND_BETA, beta);

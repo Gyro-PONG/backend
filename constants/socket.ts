@@ -40,6 +40,8 @@ export const EVENT = {
   EXIT_GAME_BY_GUEST_CALLBACK: 'exitGameByGuestCallback',
   EXIT_GAME_CALLBACK: 'exitGameCallback',
   LOAD_GAME_ROOM_LIST: 'loadGameRoomList',
+  LOAD_GAME_INFO: 'loadGameInfo',
+  ENGINE_ON: 'engineOn',
   SEND_GAME_DATA: 'sendGameData',
   FINISH_GAME: 'finishGame',
   FINISH_GAME_CALLBACK: 'finishGameCallback',

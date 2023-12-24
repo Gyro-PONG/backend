@@ -39,18 +39,19 @@ export const connectionEvent = (io: Server, socket: CustomSocket) => {
     }
 
     const user = userList.findByUserId(userId);
+    const controllerId = socket.id;
 
     if (user) {
-      user.setControllerId(socket.id);
+      user.setControllerId(controllerId);
       socket.join(user.getId());
-      io.to(userId).emit(EVENT.CONNECT_CONTROLLER_SUCCESS, socket.id);
+      io.to(userId).emit(EVENT.CONNECT_CONTROLLER_SUCCESS, controllerId);
       socket.emit(EVENT.CONNECT_CONTROLLER_SUCCESS);
     } else {
-      const newUser = new User(userId, socket.id);
+      const newUser = new User(userId, controllerId);
 
       userList.add(newUser);
       socket.join(newUser.getId());
-      io.to(userId).emit(EVENT.CONNECT_CONTROLLER_SUCCESS, socket.id);
+      io.to(userId).emit(EVENT.CONNECT_CONTROLLER_SUCCESS, controllerId);
       socket.emit(EVENT.CONNECT_CONTROLLER_SUCCESS);
     }
   });
@@ -99,6 +100,10 @@ export const connectionEvent = (io: Server, socket: CustomSocket) => {
     const gameData = gameList.findByUserId(socket.id);
 
     if (gameData) {
+      if (gameData.game.getIsStarted()) {
+        gameData.game.getEngine().stopLoop();
+      }
+
       if (gameData.isHost) {
         io.to(gameData.game.getId()).emit(
           EVENT.EXIT_GAME_BY_HOST,

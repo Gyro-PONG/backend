@@ -1,6 +1,7 @@
 import { Server, Socket } from 'socket.io';
 
 import { Game } from '../class/Game.js';
+import { GameEngine } from '../class/GameEngine.js';
 import { EVENT } from '../constants/socket.js';
 import { gameList, userList } from '../gameData/index.js';
 
@@ -163,48 +164,36 @@ export const gameEvent = (io: Server, socket: Socket) => {
 
     if (game && user) {
       game.setStarted(true);
-      io.to(gameRoom).emit(EVENT.START_GAME, {
-        level: game.getLevel(),
-        targetScore: game.getTargetScore(),
-        hostControllerId: user.getControllerId(),
-      });
+      io.to(gameRoom).emit(EVENT.START_GAME);
+
+      const engine = new GameEngine(
+        io,
+        gameRoom,
+        game.getLevel(),
+        game.getTargetScore(),
+      );
+      game.setEngine(engine);
     }
   });
 
-  interface GameData {
-    ball: {
-      x: number;
-      y: number;
-    };
-    score: {
-      host: number;
-      guest: number;
-    };
-  }
-
-  /**
-   * PC -> PC
-   * 게임이 시작되면 host는 ball의 위치 좌표 및 스코어 정보를 게스트에게 전달한다.
-   */
-  socket.on(EVENT.SEND_GAME_DATA, (gameData: GameData) => {
+  socket.on(EVENT.LOAD_GAME_INFO, (type: 'host' | 'guest') => {
+    const game = gameList.findByUserId(socket.id);
     const gameRoom = [...socket.rooms][2];
 
-    socket.to(gameRoom).emit(EVENT.SEND_GAME_DATA, gameData);
-  });
+    if (game) {
+      game.game.getEngine().addPaddles(type);
 
-  /**
-   * PC -> PC || PC -> 컨트롤러
-   * 게임이 종료되면, 게임 room에 있는 모든 유저에게 게임 종료를 알린다.
-   * 이후 게임 리스트 내 게임을 제거한다.
-   */
-  socket.on(EVENT.FINISH_GAME, (winner: 'host' | 'guest') => {
-    const gameRoom = [...socket.rooms][2];
+      socket.emit(EVENT.LOAD_GAME_INFO, {
+        level: game.game.getLevel(),
+        targetScore: game.game.getTargetScore(),
+      });
 
-    io.to(gameRoom).emit(EVENT.FINISH_GAME, {
-      winner,
-      gameId: gameRoom,
-    });
-    gameList.removeById(gameRoom);
+      if (game.game.getEngine().checkAllPlayersJoined()) {
+        io.to(gameRoom).emit(EVENT.ENGINE_ON);
+        const intervalId = game.game.getEngine().startLoop();
+        game.game.setIntervalId(intervalId);
+      }
+    }
   });
 
   /**
@@ -212,6 +201,7 @@ export const gameEvent = (io: Server, socket: Socket) => {
    * 게임 종료 후, PC 및 컨트롤러는 게임 room에서 나간다.
    */
   socket.on(EVENT.FINISH_GAME_CALLBACK, (gameId: string) => {
+    gameList.removeById(gameId);
     socket.leave(gameId);
   });
 };

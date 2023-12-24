@@ -1,17 +1,20 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import { GameEngine } from './GameEngine';
+
 export class Game {
   private _id: string;
   private hostId: string;
-  private guestId: string;
+  private guestId!: string;
+  private intervalId!: NodeJS.Timeout | null;
   private level: string;
   private targetScore: number;
   private isStarted: boolean;
+  private engine!: GameEngine;
 
   constructor(hostId: string, level: string, targetScore: number) {
     this._id = `game_${uuidv4()}`;
     this.hostId = hostId;
-    this.guestId = '';
     this.level = level;
     this.targetScore = targetScore;
     this.isStarted = false;
@@ -21,8 +24,16 @@ export class Game {
     this.guestId = guestId;
   }
 
+  public setIntervalId(intervalId: NodeJS.Timeout) {
+    this.intervalId = intervalId;
+  }
+
   public setStarted(isStarted: boolean) {
     this.isStarted = isStarted;
+  }
+
+  public setEngine(engine: GameEngine) {
+    this.engine = engine;
   }
 
   public getId() {
@@ -35,6 +46,10 @@ export class Game {
 
   public getGuestId() {
     return this.guestId;
+  }
+
+  public getIntervalId() {
+    return this.intervalId;
   }
 
   public getLevel() {
@@ -51,5 +66,9 @@ export class Game {
 
   public getIsStarted() {
     return this.isStarted;
+  }
+
+  public getEngine() {
+    return this.engine;
   }
 }

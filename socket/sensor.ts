@@ -46,11 +46,11 @@ export const sensorEvent = (io: Server, socket: CustomSocket) => {
    * 컨트롤러 -> PC
    * 환경설정 내 컨트롤러를 등록하는 과정에서, 유저에게 컨트롤러를 왼쪽으로 기울이라는 응답을 보낸다.
    */
-  socket.on(EVENT.CHECK_LEFT, () => {
+  socket.on(EVENT.LEFT_ANGLE_CHECK, () => {
     const user = userList.findByControllerId(socket.id);
 
     if (user) {
-      io.to(user.getUserId()).emit(EVENT.CHECK_LEFT);
+      io.to(user.getUserId()).emit(EVENT.LEFT_ANGLE_CHECK);
     }
   });
 
@@ -58,13 +58,13 @@ export const sensorEvent = (io: Server, socket: CustomSocket) => {
    * 컨트롤러 -> PC
    * 환경설정 내 컨트롤러를 등록하는 과정에서, 유저에게 컨트롤러를 오른쪽으로 기울이라는 응답을 보낸다.
    */
-  socket.on(EVENT.CHECK_RIGHT, (leftBeta: number) => {
+  socket.on(EVENT.RIGHT_ANGLE_CHECK, (leftBeta: number) => {
     const user = userList.findByControllerId(socket.id);
 
     if (user) {
       user.setLeftAngle(leftBeta);
       socket.leftAngle = leftBeta;
-      io.to(user.getUserId()).emit(EVENT.CHECK_RIGHT);
+      io.to(user.getUserId()).emit(EVENT.RIGHT_ANGLE_CHECK);
     }
   });
 
@@ -72,31 +72,31 @@ export const sensorEvent = (io: Server, socket: CustomSocket) => {
    * 컨트롤러 -> PC
    * 환경설정 내 컨트롤러를 등록하는 과정에서, 유저에게 컨트롤러 등록이 완료되었다는 응답을 보낸다.
    */
-  socket.on(EVENT.CHECK_FINISH, (rightBeta: number) => {
+  socket.on(EVENT.FINISH_ANGLE_CHECK, (rightBeta: number) => {
     const user = userList.findByControllerId(socket.id);
 
     if (user) {
       user.setRightAngle(rightBeta);
       socket.rightAngle = rightBeta;
-      io.to(user.getUserId()).emit(EVENT.CHECK_FINISH, {
+      io.to(user.getUserId()).emit(EVENT.FINISH_ANGLE_CHECK, {
         left: user.getLeftAngle(),
         right: user.getRightAngle(),
       });
     }
   });
 
-  socket.on(EVENT.RESET_CHECK, () => {
+  socket.on(EVENT.RESET_ANGLE, () => {
     const user = userList.findByUserId(socket.id);
 
     if (user) {
-      io.to(user.getControllerId()).emit(EVENT.RESET_CHECK);
+      io.to(user.getControllerId()).emit(EVENT.RESET_ANGLE);
     }
   });
 
-  socket.on(EVENT.CHECK_CLOSE, () => {
+  socket.on(EVENT.CLOSE_ANGLE_CHECK, () => {
     const userControllerRoom = [...socket.rooms][1];
 
-    io.to(userControllerRoom).emit(EVENT.CHECK_CLOSE);
+    io.to(userControllerRoom).emit(EVENT.CLOSE_ANGLE_CHECK);
   });
 
   socket.on(EVENT.ANGLE_INFO, () => {

@@ -85,10 +85,29 @@ export const sensorEvent = (io: Server, socket: CustomSocket) => {
     }
   });
 
+  socket.on(EVENT.RESET_CHECK, () => {
+    const user = userList.findByUserId(socket.id);
+
+    if (user) {
+      io.to(user.getControllerId()).emit(EVENT.RESET_CHECK);
+    }
+  });
+
   socket.on(EVENT.CHECK_CLOSE, () => {
     const userControllerRoom = [...socket.rooms][1];
 
     io.to(userControllerRoom).emit(EVENT.CHECK_CLOSE);
+  });
+
+  socket.on(EVENT.ANGLE_INFO, () => {
+    const user = userList.findByUserId(socket.id);
+
+    if (user) {
+      socket.emit(EVENT.ANGLE_INFO, {
+        left: user.getLeftAngle(),
+        right: user.getRightAngle(),
+      });
+    }
   });
 
   socket.on(EVENT.SET_MOTION, (set: boolean) => {

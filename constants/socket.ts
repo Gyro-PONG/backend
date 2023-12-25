@@ -22,6 +22,8 @@ export const EVENT = {
   SEND_MOTION_DOWN: 'sendMotionDown',
   SEND_MOTION_LEFT: 'sendMotionLeft',
   SEND_MOTION_RIGHT: 'sendMotionRight',
+  RESET_CHECK: 'resetCheck',
+  ANGLE_INFO: 'angleInfo',
 
   SET_VIBRATION: 'setVibration',
   SEND_VIBRATION: 'sendVibration',
